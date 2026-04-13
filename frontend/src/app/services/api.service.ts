@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Employee, EmployeeCreateRequest } from '../models/employee';
+import { AuthResponse, Employee, EmployeeCreateRequest, LoginRequest } from '../models/employee';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -8,18 +8,24 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
-  login(payload: EmployeeCreateRequest) {
-    return this.http.post(`${this.api}/auth/login`, payload);
+  register(payload: EmployeeCreateRequest) {
+    return this.http.post<AuthResponse>(`${this.api}/auth/register`, payload);
   }
 
-  createEmployee(payload: EmployeeCreateRequest) {
-    return this.http.post<Employee>(`${this.api}/employees`, payload);
+  login(payload: LoginRequest) {
+    return this.http.post<AuthResponse>(`${this.api}/auth/login`, payload);
   }
 
   listEmployees(search?: string) {
-    return this.http.get<Employee[]>(`${this.api}/employees`, {
-      params: search ? { search } : {}
-    });
+    return this.http.get<Employee[]>(`${this.api}/employees`, { params: search ? { search } : {} });
+  }
+
+  updateEmployee(id: number, payload: EmployeeCreateRequest) {
+    return this.http.put<Employee>(`${this.api}/employees/${id}`, payload);
+  }
+
+  deleteEmployee(id: number) {
+    return this.http.delete(`${this.api}/employees/${id}`);
   }
 
   exportPdf(id: number) {

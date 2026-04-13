@@ -15,8 +15,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .IsUnique();
 
         modelBuilder.Entity<EmployeeRecord>()
+            .HasIndex(x => x.Username)
+            .IsUnique();
+
+        modelBuilder.Entity<EmployeeRecord>()
             .Property(x => x.UserType)
             .HasMaxLength(20);
+
+        modelBuilder.Entity<EmployeeRecord>()
+            .Property(x => x.Username)
+            .HasMaxLength(60);
+
+        modelBuilder.Entity<EmployeeRecord>()
+            .Property(x => x.Password)
+            .HasMaxLength(150);
 
         modelBuilder.Entity<EmployeeRecord>()
             .Property(x => x.EmployeeName)
@@ -25,6 +37,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<EmployeeRecord>()
             .Property(x => x.Email)
             .HasMaxLength(200);
+
+        modelBuilder.Entity<EmployeeRecord>()
+            .Property(x => x.ScannerId)
+            .HasMaxLength(100);
 
         modelBuilder.Entity<EmployeeRecord>()
             .Property(x => x.CertificateCode)

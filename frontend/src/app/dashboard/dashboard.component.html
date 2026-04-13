@@ -1,11 +1,16 @@
 <div class="dashboard">
   <div class="card">
     <div class="top">
-      <h2>Dashboard</h2>
-      <div class="search-wrap">
-        <input [(ngModel)]="search" placeholder="Search by name/email/type/code" />
-        <button class="btn-primary" (click)="fetch()">Search</button>
+      <div>
+        <h2>User Dashboard</h2>
+        <p *ngIf="session">Welcome, {{ session.name }} ({{ session.role }})</p>
       </div>
+      <button (click)="logout()">Logout</button>
+    </div>
+
+    <div class="search-wrap">
+      <input [(ngModel)]="search" placeholder="Search by name, username, email, code, scanner" />
+      <button class="btn-primary" (click)="fetch()">Search</button>
     </div>
 
     <div class="grid-wrap">
@@ -13,31 +18,54 @@
         <thead>
           <tr>
             <th>Name</th>
+            <th>Username</th>
             <th>Type</th>
-            <th>Age</th>
-            <th>DOB</th>
             <th>Email</th>
-            <th>Salary</th>
+            <th>Scanner</th>
             <th>Code</th>
-            <th>Certificate</th>
+            <th>Download</th>
+            <th *ngIf="isAdmin">Manage</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let e of employees">
             <td>{{ e.employeeName }}</td>
+            <td>{{ e.username }}</td>
             <td>{{ e.userType }}</td>
-            <td>{{ e.age }}</td>
-            <td>{{ e.dob }}</td>
             <td>{{ e.email }}</td>
-            <td>{{ e.salary ?? '-' }}</td>
+            <td>{{ e.scannerId }}</td>
             <td>{{ e.certificateCode }}</td>
-            <td class="actions">
-              <button (click)="exportExcel(e.id)">Excel</button>
-              <button (click)="exportPdf(e.id)">PDF</button>
+            <td>
+              <select (change)="onDownloadChange(e.id, $any($event.target).value)">
+                <option value="">Select</option>
+                <option value="pdf">PDF</option>
+                <option value="excel">Excel</option>
+              </select>
+            </td>
+            <td *ngIf="isAdmin" class="actions">
+              <button (click)="openEdit(e)">Edit</button>
+              <button class="danger" (click)="deleteUser(e.id)">Delete</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <div class="edit-box" *ngIf="editRecord">
+      <h3>Edit User</h3>
+      <div class="edit-grid">
+        <input [(ngModel)]="editRecord.employeeName" placeholder="Employee name" />
+        <input [(ngModel)]="editRecord.email" placeholder="Email" />
+        <input [(ngModel)]="editRecord.scannerId" placeholder="Scanner" />
+        <input [(ngModel)]="editRecord.age" type="number" placeholder="Age" />
+        <input [(ngModel)]="editRecord.dob" type="date" />
+      </div>
+      <div class="actions">
+        <button class="btn-primary" (click)="saveEdit()">Save</button>
+        <button (click)="editRecord = null">Cancel</button>
+      </div>
+    </div>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
   </div>
 </div>

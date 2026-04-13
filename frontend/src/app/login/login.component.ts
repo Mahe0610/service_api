@@ -1,58 +1,76 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ApiService } from '../services/api.service';
+import { EmployeeCreateRequest } from '../models/employee';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
 export class LoginComponent {
+  mode: 'login' | 'register' = 'login';
   error = '';
 
-  form = this.fb.group({
-    userType: ['user', Validators.required],
+  loginForm = this.fb.group({
+    username: ['', Validators.required],
+    password: ['', Validators.required]
+  });
+
+  registerForm = this.fb.group({
+    username: ['', Validators.required],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     employeeName: ['', Validators.required],
     age: [null as number | null, [Validators.required, Validators.min(18)]],
     dob: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    salary: [null as number | null]
+    scannerId: ['', Validators.required]
   });
 
   constructor(private fb: FormBuilder, private api: ApiService, private router: Router) {}
 
-  onUserTypeChange() {
-    const role = this.form.value.userType;
-    if (role === 'admin') {
-      this.form.controls.salary.addValidators([Validators.required, Validators.min(0)]);
-    } else {
-      this.form.controls.salary.clearValidators();
-      this.form.controls.salary.setValue(null);
-    }
-    this.form.controls.salary.updateValueAndValidity();
+  switchMode(mode: 'login' | 'register') {
+    this.mode = mode;
+    this.error = '';
   }
 
-  submit() {
-    this.error = '';
-    this.onUserTypeChange();
-    if (this.form.invalid) {
-      this.error = 'Please fill all required fields correctly.';
+  submitLogin() {
+    if (this.loginForm.invalid) {
+      this.error = 'Enter valid username and password.';
       return;
     }
 
-    const payload = this.form.getRawValue();
-    this.api.login(payload as never).subscribe({
-      next: () => {
-        this.api.createEmployee(payload as never).subscribe({
-          next: () => this.router.navigateByUrl('/dashboard'),
-          error: err => (this.error = err.error ?? 'Failed to save employee details')
-        });
+    this.api.login(this.loginForm.getRawValue() as { username: string; password: string }).subscribe({
+      next: auth => {
+        localStorage.setItem('session', JSON.stringify(auth));
+        this.router.navigateByUrl('/dashboard');
       },
-      error: err => (this.error = err.error ?? 'Login validation failed')
+      error: err => (this.error = err.error ?? 'Login failed')
+    });
+  }
+
+  submitRegister() {
+    if (this.registerForm.invalid) {
+      this.error = 'Please complete all registration fields.';
+      return;
+    }
+
+    const payload: EmployeeCreateRequest = {
+      userType: 'user',
+      salary: null,
+      ...(this.registerForm.getRawValue() as never)
+    };
+
+    this.api.register(payload).subscribe({
+      next: auth => {
+        localStorage.setItem('session', JSON.stringify(auth));
+        this.router.navigateByUrl('/dashboard');
+      },
+      error: err => (this.error = err.error ?? 'Registration failed')
     });
   }
 }

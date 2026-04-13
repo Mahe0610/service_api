@@ -1,34 +1,11 @@
-.layout {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-}
-
-.form-card {
-  width: min(520px, 92vw);
-}
-
-h2 {
-  margin-top: 0;
-}
-
-form {
-  display: grid;
-  gap: 0.65rem;
-}
-
-label {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-input,
-select {
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 0.6rem;
-}
-
-.error {
-  color: #b91c1c;
-}
+.auth-layout { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
+.auth-card { width: min(560px, 95vw); }
+h1 { margin: 0; }
+.sub { color: #475569; margin-top: 0.45rem; }
+.tabs { display: flex; gap: 0.5rem; margin: 1rem 0; }
+.tabs button, .tabs a { border: 1px solid #cbd5e1; background: #fff; padding: 0.5rem 0.75rem; border-radius: 999px; text-decoration: none; color: #0f172a; }
+.tabs .active { background: #dbeafe; border-color: #93c5fd; }
+form { display: grid; gap: 0.55rem; }
+label { font-size: 0.86rem; font-weight: 600; color: #334155; }
+input { border: 1px solid #cbd5e1; border-radius: 9px; padding: 0.65rem; }
+.error { color: #dc2626; margin-top: 0.6rem; }

@@ -1,34 +1,40 @@
-<div class="layout">
-  <div class="card form-card">
-    <h2>Employee Login</h2>
-    <p>Admin must provide salary; normal user salary is hidden.</p>
+<div class="auth-layout">
+  <div class="card auth-card">
+    <h1>Employee Portal</h1>
+    <p class="sub">Login if you already have an account, otherwise register.</p>
 
-    <form [formGroup]="form" (ngSubmit)="submit()">
-      <label>User Type</label>
-      <select formControlName="userType" (change)="onUserTypeChange()">
-        <option value="user">Normal User</option>
-        <option value="admin">Admin</option>
-      </select>
+    <div class="tabs">
+      <button [class.active]="mode === 'login'" (click)="switchMode('login')">Login</button>
+      <button [class.active]="mode === 'register'" (click)="switchMode('register')">Register</button>
+      <a routerLink="/admin-login">Admin Login</a>
+    </div>
 
+    <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+      <label>Username</label>
+      <input formControlName="username" type="text" />
+      <label>Password</label>
+      <input formControlName="password" type="password" />
+      <button class="btn-primary" type="submit">Login</button>
+    </form>
+
+    <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
+      <label>Username</label>
+      <input formControlName="username" type="text" />
+      <label>Password</label>
+      <input formControlName="password" type="password" />
       <label>Employee Name</label>
       <input formControlName="employeeName" type="text" />
-
       <label>Age</label>
       <input formControlName="age" type="number" />
-
       <label>Date of Birth</label>
       <input formControlName="dob" type="date" />
-
       <label>Email</label>
       <input formControlName="email" type="email" />
-
-      <ng-container *ngIf="form.value.userType === 'admin'">
-        <label>Salary</label>
-        <input formControlName="salary" type="number" />
-      </ng-container>
-
-      <button class="btn-primary" type="submit">Login & Save</button>
-      <div class="error" *ngIf="error">{{ error }}</div>
+      <label>Scanner</label>
+      <input formControlName="scannerId" type="text" placeholder="Scanner device id" />
+      <button class="btn-primary" type="submit">Create Account</button>
     </form>
+
+    <div class="error" *ngIf="error">{{ error }}</div>
   </div>
 </div>

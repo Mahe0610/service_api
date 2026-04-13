@@ -1,0 +1,6 @@
+.auth-layout { min-height: 100vh; display: grid; place-items: center; padding: 1rem; }
+.auth-card { width: min(500px, 95vw); }
+form { display: grid; gap: 0.65rem; margin: 1rem 0; }
+input { border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.65rem; }
+.error { color: #dc2626; margin-top: 0.6rem; }
+a { color: #2563eb; text-decoration: none; }

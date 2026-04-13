@@ -1,14 +1,23 @@
+:root {
+  --bg: #eff4ff;
+  --card: #ffffff;
+  --text: #0f172a;
+  --primary: #2563eb;
+}
+
+* { box-sizing: border-box; }
+
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #f3f6fb;
-  color: #1f2937;
+  font-family: Inter, Arial, Helvetica, sans-serif;
+  background: radial-gradient(circle at top right, #dbeafe, var(--bg));
+  color: var(--text);
 }
 
 .card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  background: var(--card);
+  border-radius: 16px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
   padding: 1.25rem;
 }
 
@@ -20,6 +29,6 @@ button {
 }
 
 .btn-primary {
-  background: #2563eb;
+  background: var(--primary);
   color: #fff;
 }
