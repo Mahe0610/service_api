@@ -15,7 +15,6 @@ import { AuthResponse, Employee, EmployeeCreateRequest } from '../models/employe
 export class DashboardComponent implements OnInit {
   employees: Employee[] = [];
   search = '';
-  selectedDownload = '';
   editRecord: Employee | null = null;
   error = '';
   session: AuthResponse | null = null;
@@ -37,36 +36,39 @@ export class DashboardComponent implements OnInit {
     return this.session?.role === 'admin';
   }
 
-  canEdit(record: Employee) {
-    if (!this.session) return false;
-    return this.isAdmin || this.session.userId === record.id;
-  }
-
   fetch() {
-    this.api.listEmployees(this.search).subscribe(data => (this.employees = data));
+    this.api.listEmployees(this.isAdmin ? this.search : undefined).subscribe({
+      next: data => {
+        this.employees = this.isAdmin
+          ? data
+          : data.filter(employee => employee.id === this.session?.userId);
+      },
+      error: err => (this.error = err.error ?? 'Unable to load dashboard data')
+    });
   }
 
   openEdit(record: Employee) {
+    if (!this.isAdmin) return;
     this.editRecord = { ...record };
   }
 
   saveEdit() {
-    if (!this.editRecord) return;
-    const update = this.editRecord;
+    if (!this.editRecord || !this.isAdmin) return;
+
     const payload: EmployeeCreateRequest = {
-      userType: update.userType,
-      username: update.username,
+      userType: this.editRecord.userType,
+      username: this.editRecord.username,
       password: '',
-      employeeName: update.employeeName,
-      age: update.age,
-      dob: update.dob,
-      address: update.address,
-      email: update.email,
-      scannerId: update.scannerId,
-      salary: update.salary ?? null
+      employeeName: this.editRecord.employeeName,
+      age: this.editRecord.age,
+      dob: this.editRecord.dob,
+      address: this.editRecord.address,
+      email: this.editRecord.email,
+      scannerId: this.editRecord.scannerId,
+      salary: this.editRecord.salary ?? null
     };
 
-    this.api.updateEmployee(update.id, payload).subscribe({
+    this.api.updateEmployee(this.editRecord.id, payload).subscribe({
       next: () => {
         this.editRecord = null;
         this.fetch();
@@ -81,11 +83,6 @@ export class DashboardComponent implements OnInit {
       next: () => this.fetch(),
       error: err => (this.error = err.error ?? 'Delete failed')
     });
-  }
-
-  onDownloadChange(id: number, format: string) {
-    if (format === 'pdf') this.api.exportPdf(id);
-    if (format === 'excel') this.api.exportExcel(id);
   }
 
   logout() {

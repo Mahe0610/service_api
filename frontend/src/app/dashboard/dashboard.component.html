@@ -2,13 +2,13 @@
   <div class="card">
     <div class="top">
       <div>
-        <h2>User Dashboard</h2>
+        <h2>Dashboard</h2>
         <p *ngIf="session">Welcome, {{ session.name }} ({{ session.role }})</p>
       </div>
       <button (click)="logout()">Logout</button>
     </div>
 
-    <div class="search-wrap">
+    <div class="search-wrap" *ngIf="isAdmin">
       <input [(ngModel)]="search" placeholder="Search by name, username, email, code, scanner" />
       <button class="btn-primary" (click)="fetch()">Search</button>
     </div>
@@ -18,53 +18,37 @@
         <thead>
           <tr>
             <th>Name</th>
-            <th>Username</th>
-            <th>Type</th>
             <th>Email</th>
             <th>Address</th>
-            <th>Scanner</th>
-            <th>Salary</th>
-            <th>Code</th>
-            <th>Download</th>
-            <th>Manage</th>
+            <th>DOB</th>
+            <th *ngIf="isAdmin">Salary</th>
+            <th *ngIf="isAdmin">Manage</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let e of employees">
             <td>{{ e.employeeName }}</td>
-            <td>{{ e.username }}</td>
-            <td>{{ e.userType }}</td>
             <td>{{ e.email }}</td>
             <td>{{ e.address }}</td>
-            <td>{{ e.scannerId }}</td>
-            <td>{{ e.salary ?? 'N/A' }}</td>
-            <td>{{ e.certificateCode }}</td>
-            <td>
-              <select (change)="onDownloadChange(e.id, $any($event.target).value)">
-                <option value="">Select</option>
-                <option value="pdf">PDF</option>
-                <option value="excel">Excel</option>
-              </select>
-            </td>
-            <td class="actions">
-              <button (click)="openEdit(e)" [disabled]="!canEdit(e)">Edit</button>
-              <button class="danger" (click)="deleteUser(e.id)" [disabled]="!isAdmin">Delete</button>
+            <td>{{ e.dob | date: 'yyyy-MM-dd' }}</td>
+            <td *ngIf="isAdmin">{{ e.salary ?? 'N/A' }}</td>
+            <td class="actions" *ngIf="isAdmin">
+              <button (click)="openEdit(e)">Edit</button>
+              <button class="danger" (click)="deleteUser(e.id)">Delete</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="edit-box" *ngIf="editRecord">
+    <div class="edit-box" *ngIf="isAdmin && editRecord">
       <h3>Edit User</h3>
       <div class="edit-grid">
-        <input [(ngModel)]="editRecord.employeeName" placeholder="Employee name" />
+        <input [(ngModel)]="editRecord.employeeName" placeholder="Name" />
         <input [(ngModel)]="editRecord.email" placeholder="Email" />
         <input [(ngModel)]="editRecord.address" placeholder="Address" />
-        <input [(ngModel)]="editRecord.scannerId" placeholder="Scanner" />
-        <input [(ngModel)]="editRecord.salary" type="number" placeholder="Salary" />
-        <input [(ngModel)]="editRecord.age" type="number" placeholder="Age" />
         <input [(ngModel)]="editRecord.dob" type="date" />
+        <input [(ngModel)]="editRecord.salary" type="number" placeholder="Salary" />
       </div>
       <div class="actions">
         <button class="btn-primary" (click)="saveEdit()">Save</button>
