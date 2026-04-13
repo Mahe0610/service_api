@@ -59,10 +59,17 @@ export class LoginComponent {
       return;
     }
 
+    const formValue = this.registerForm.getRawValue();
     const payload: EmployeeCreateRequest = {
       userType: 'user',
       salary: null,
-      ...(this.registerForm.getRawValue() as never)
+      username: formValue.username!,
+      password: formValue.password!,
+      employeeName: formValue.employeeName!,
+      age: formValue.age!,
+      dob: formValue.dob!,
+      email: formValue.email!,
+      scannerId: formValue.scannerId!
     };
 
     this.api.register(payload).subscribe({
