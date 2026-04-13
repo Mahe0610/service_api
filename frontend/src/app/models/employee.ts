@@ -5,6 +5,7 @@ export interface Employee {
   employeeName: string;
   age: number;
   dob: string;
+  address: string;
   email: string;
   scannerId: string;
   salary?: number;
@@ -18,13 +19,15 @@ export interface EmployeeCreateRequest {
   employeeName: string;
   age: number;
   dob: string;
+  address: string;
   email: string;
   scannerId: string;
   salary?: number | null;
 }
 
 export interface LoginRequest {
-  username: string;
+  username?: string;
+  email?: string;
   password: string;
 }
 

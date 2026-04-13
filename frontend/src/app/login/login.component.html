@@ -6,32 +6,29 @@
     <div class="tabs">
       <button [class.active]="mode === 'login'" (click)="switchMode('login')">Login</button>
       <button [class.active]="mode === 'register'" (click)="switchMode('register')">Register</button>
-      <a routerLink="/admin-login">Admin Login</a>
     </div>
 
     <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="submitLogin()">
-      <label>Username</label>
-      <input formControlName="username" type="text" />
+      <label>Email (or admin username)</label>
+      <input formControlName="identifier" type="text" />
       <label>Password</label>
       <input formControlName="password" type="password" />
       <button class="btn-primary" type="submit">Login</button>
     </form>
 
     <form *ngIf="mode === 'register'" [formGroup]="registerForm" (ngSubmit)="submitRegister()">
-      <label>Username</label>
-      <input formControlName="username" type="text" />
       <label>Password</label>
       <input formControlName="password" type="password" />
-      <label>Employee Name</label>
+      <label>Name</label>
       <input formControlName="employeeName" type="text" />
-      <label>Age</label>
-      <input formControlName="age" type="number" />
       <label>Date of Birth</label>
       <input formControlName="dob" type="date" />
+      <label>Address</label>
+      <input formControlName="address" type="text" />
       <label>Email</label>
       <input formControlName="email" type="email" />
-      <label>Scanner</label>
-      <input formControlName="scannerId" type="text" placeholder="Scanner device id" />
+      <label>Salary</label>
+      <input formControlName="salary" type="number" />
       <button class="btn-primary" type="submit">Create Account</button>
     </form>
 

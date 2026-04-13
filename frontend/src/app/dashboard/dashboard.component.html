@@ -21,10 +21,12 @@
             <th>Username</th>
             <th>Type</th>
             <th>Email</th>
+            <th>Address</th>
             <th>Scanner</th>
+            <th>Salary</th>
             <th>Code</th>
             <th>Download</th>
-            <th *ngIf="isAdmin">Manage</th>
+            <th>Manage</th>
           </tr>
         </thead>
         <tbody>
@@ -33,7 +35,9 @@
             <td>{{ e.username }}</td>
             <td>{{ e.userType }}</td>
             <td>{{ e.email }}</td>
+            <td>{{ e.address }}</td>
             <td>{{ e.scannerId }}</td>
+            <td>{{ e.salary ?? 'N/A' }}</td>
             <td>{{ e.certificateCode }}</td>
             <td>
               <select (change)="onDownloadChange(e.id, $any($event.target).value)">
@@ -42,9 +46,9 @@
                 <option value="excel">Excel</option>
               </select>
             </td>
-            <td *ngIf="isAdmin" class="actions">
-              <button (click)="openEdit(e)">Edit</button>
-              <button class="danger" (click)="deleteUser(e.id)">Delete</button>
+            <td class="actions">
+              <button (click)="openEdit(e)" [disabled]="!canEdit(e)">Edit</button>
+              <button class="danger" (click)="deleteUser(e.id)" [disabled]="!isAdmin">Delete</button>
             </td>
           </tr>
         </tbody>
@@ -56,7 +60,9 @@
       <div class="edit-grid">
         <input [(ngModel)]="editRecord.employeeName" placeholder="Employee name" />
         <input [(ngModel)]="editRecord.email" placeholder="Email" />
+        <input [(ngModel)]="editRecord.address" placeholder="Address" />
         <input [(ngModel)]="editRecord.scannerId" placeholder="Scanner" />
+        <input [(ngModel)]="editRecord.salary" type="number" placeholder="Salary" />
         <input [(ngModel)]="editRecord.age" type="number" placeholder="Age" />
         <input [(ngModel)]="editRecord.dob" type="date" />
       </div>

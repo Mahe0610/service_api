@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ApiService } from '../services/api.service';
 import { EmployeeCreateRequest } from '../models/employee';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -17,18 +17,17 @@ export class LoginComponent {
   error = '';
 
   loginForm = this.fb.group({
-    username: ['', Validators.required],
+    identifier: ['', Validators.required],
     password: ['', Validators.required]
   });
 
   registerForm = this.fb.group({
-    username: ['', Validators.required],
     password: ['', [Validators.required, Validators.minLength(6)]],
     employeeName: ['', Validators.required],
-    age: [null as number | null, [Validators.required, Validators.min(18)]],
     dob: ['', Validators.required],
+    address: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    scannerId: ['', Validators.required]
+    salary: [null as number | null, [Validators.required, Validators.min(0)]]
   });
 
   constructor(private fb: FormBuilder, private api: ApiService, private router: Router) {}
@@ -40,11 +39,18 @@ export class LoginComponent {
 
   submitLogin() {
     if (this.loginForm.invalid) {
-      this.error = 'Enter valid username and password.';
+      this.error = 'Enter valid email/username and password.';
       return;
     }
 
-    this.api.login(this.loginForm.getRawValue() as { username: string; password: string }).subscribe({
+    const payload = this.loginForm.getRawValue();
+    const identifier = payload.identifier?.trim() ?? '';
+
+    this.api.login({
+      username: identifier.includes('@') ? '' : identifier,
+      email: identifier.includes('@') ? identifier : '',
+      password: payload.password ?? ''
+    }).subscribe({
       next: auth => {
         localStorage.setItem('session', JSON.stringify(auth));
         this.router.navigateByUrl('/dashboard');
@@ -62,14 +68,15 @@ export class LoginComponent {
     const formValue = this.registerForm.getRawValue();
     const payload: EmployeeCreateRequest = {
       userType: 'user',
-      salary: null,
-      username: formValue.username!,
+      salary: formValue.salary!,
+      username: formValue.email!,
       password: formValue.password!,
       employeeName: formValue.employeeName!,
-      age: formValue.age!,
+      age: 18,
       dob: formValue.dob!,
+      address: formValue.address!,
       email: formValue.email!,
-      scannerId: formValue.scannerId!
+      scannerId: 'self-service'
     };
 
     this.api.register(payload).subscribe({

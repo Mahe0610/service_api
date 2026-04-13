@@ -37,6 +37,11 @@ export class DashboardComponent implements OnInit {
     return this.session?.role === 'admin';
   }
 
+  canEdit(record: Employee) {
+    if (!this.session) return false;
+    return this.isAdmin || this.session.userId === record.id;
+  }
+
   fetch() {
     this.api.listEmployees(this.search).subscribe(data => (this.employees = data));
   }
@@ -55,6 +60,7 @@ export class DashboardComponent implements OnInit {
       employeeName: update.employeeName,
       age: update.age,
       dob: update.dob,
+      address: update.address,
       email: update.email,
       scannerId: update.scannerId,
       salary: update.salary ?? null
