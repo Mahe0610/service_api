@@ -25,6 +25,7 @@ public class EmployeesController(AppDbContext dbContext, CertificateService cert
             EmployeeName = request.EmployeeName,
             Age = request.Age,
             Dob = request.Dob,
+            Address = request.Address,
             Email = request.Email,
             ScannerId = request.ScannerId,
             Salary = request.UserType.Equals("admin", StringComparison.OrdinalIgnoreCase) ? request.Salary : null
@@ -47,6 +48,7 @@ public class EmployeesController(AppDbContext dbContext, CertificateService cert
                 e.EmployeeName.ToLower().Contains(q) ||
                 e.Username.ToLower().Contains(q) ||
                 e.Email.ToLower().Contains(q) ||
+                e.Address.ToLower().Contains(q) ||
                 e.UserType.ToLower().Contains(q) ||
                 e.CertificateCode.ToLower().Contains(q) ||
                 e.ScannerId.ToLower().Contains(q));
@@ -71,14 +73,14 @@ public class EmployeesController(AppDbContext dbContext, CertificateService cert
         record.EmployeeName = request.EmployeeName;
         record.Age = request.Age;
         record.Dob = request.Dob;
+        record.Address = request.Address;
         record.Email = request.Email;
         record.ScannerId = request.ScannerId;
 
         if (!string.IsNullOrWhiteSpace(request.Password))
             record.Password = request.Password;
 
-        if (record.UserType == "admin")
-            record.Salary = request.Salary;
+        record.Salary = request.Salary;
 
         await dbContext.SaveChangesAsync();
         return Ok(record);

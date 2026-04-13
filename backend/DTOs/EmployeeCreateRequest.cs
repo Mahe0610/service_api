@@ -8,6 +8,7 @@ public class EmployeeCreateRequest
     public string EmployeeName { get; set; } = string.Empty;
     public int Age { get; set; }
     public DateOnly Dob { get; set; }
+    public string Address { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string ScannerId { get; set; } = string.Empty;
     public decimal? Salary { get; set; }

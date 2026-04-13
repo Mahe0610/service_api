@@ -39,6 +39,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasMaxLength(200);
 
         modelBuilder.Entity<EmployeeRecord>()
+            .Property(x => x.Address)
+            .HasMaxLength(300);
+
+        modelBuilder.Entity<EmployeeRecord>()
             .Property(x => x.ScannerId)
             .HasMaxLength(100);
 

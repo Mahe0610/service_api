@@ -14,38 +14,25 @@ public class CertificateService
     public byte[] GenerateExcel(EmployeeRecord record)
     {
         using var workbook = new XLWorkbook();
-        var ws = workbook.Worksheets.Add("Certificate");
+        var ws = workbook.Worksheets.Add("EmployeeExport");
 
-        ws.Cell("A1").Value = "Asterix Company";
-        ws.Cell("A2").Value = "Employee Certificate";
-        ws.Range("A1:B1").Merge().Style.Font.SetBold().Font.SetFontSize(16);
-        ws.Range("A2:B2").Merge().Style.Font.SetBold();
+        ws.Cell("A1").Value = "User Name";
+        ws.Cell("B1").Value = "Email";
+        ws.Cell("C1").Value = "Salary";
+        ws.Cell("D1").Value = "Barcode";
+        ws.Range("A1:D1").Style.Font.SetBold().Fill.SetBackgroundColor(XLColor.LightGray);
 
-        ws.Cell("A4").Value = "Certificate Code";
-        ws.Cell("B4").Value = record.CertificateCode;
-        ws.Cell("A5").Value = "Username";
-        ws.Cell("B5").Value = record.Username;
-        ws.Cell("A6").Value = "Employee Name";
-        ws.Cell("B6").Value = record.EmployeeName;
-        ws.Cell("A7").Value = "User Type";
-        ws.Cell("B7").Value = record.UserType;
-        ws.Cell("A8").Value = "Age";
-        ws.Cell("B8").Value = record.Age;
-        ws.Cell("A9").Value = "DOB";
-        ws.Cell("B9").Value = record.Dob.ToString("yyyy-MM-dd");
-        ws.Cell("A10").Value = "Email";
-        ws.Cell("B10").Value = record.Email;
-        ws.Cell("A11").Value = "Scanner";
-        ws.Cell("B11").Value = record.ScannerId;
-        ws.Cell("A12").Value = "Salary";
-        ws.Cell("B12").Value = record.Salary?.ToString("0.00") ?? "N/A";
+        ws.Cell("A2").Value = record.EmployeeName;
+        ws.Cell("B2").Value = record.Email;
+        ws.Cell("C2").Value = record.Salary?.ToString("0.00") ?? "N/A";
 
         using var barcodeStream = new MemoryStream(GenerateBarcode(record.CertificateCode));
         ws.AddPicture(barcodeStream)
-            .MoveTo(ws.Cell("A14"))
+            .MoveTo(ws.Cell("D2"))
             .WithSize(220, 60);
 
-        ws.Columns("A:B").AdjustToContents();
+        ws.Columns("A:D").AdjustToContents();
+        ws.Row(2).Height = 50;
 
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
@@ -55,7 +42,7 @@ public class CertificateService
     public byte[] GeneratePdf(EmployeeRecord record)
     {
         QuestPDF.Settings.License = LicenseType.Community;
-        var barcodePng = GenerateBarcode(record.CertificateCode);
+        QuestPDF.Settings.EnableDebugging = true;
 
         return Document.Create(container =>
         {
@@ -63,44 +50,47 @@ public class CertificateService
             {
                 page.Size(PageSizes.A4);
                 page.PageColor(Colors.White);
-                page.Margin(30);
+                page.Margin(24);
 
-                page.Header().Row(row =>
+                page.Header().Text("Employee Export").Bold().FontSize(18);
+
+                page.Content().PaddingTop(20).Column(column =>
                 {
-                    row.ConstantItem(52).Height(52)
-                        .Background(Colors.Blue.Medium)
-                        .AlignCenter().AlignMiddle()
-                        .Text("AC").FontColor(Colors.White).Bold();
-                    row.RelativeItem().PaddingLeft(12).Column(column =>
+                    column.Item().Table(table =>
                     {
-                        column.Item().Text("Asterix Company").FontSize(20).Bold();
-                        column.Item().Text("Employee Certificate").FontSize(12).FontColor(Colors.Grey.Darken2);
+                        table.ColumnsDefinition(columns =>
+                        {
+                            columns.RelativeColumn(2);
+                            columns.RelativeColumn(3);
+                            columns.RelativeColumn(2);
+                            columns.RelativeColumn(3);
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Element(HeaderCellStyle).Text("User Name");
+                            header.Cell().Element(HeaderCellStyle).Text("Email");
+                            header.Cell().Element(HeaderCellStyle).Text("Salary");
+                            header.Cell().Element(HeaderCellStyle).Text("Barcode");
+                        });
+
+                        table.Cell().Element(BodyCellStyle).Text(record.EmployeeName);
+                        table.Cell().Element(BodyCellStyle).Text(record.Email);
+                        table.Cell().Element(BodyCellStyle).Text(record.Salary?.ToString("0.00") ?? "N/A");
+                        table.Cell().Element(BodyCellStyle).Height(60).Image(GenerateBarcode(record.CertificateCode)).FitArea();
                     });
                 });
 
-                page.Content().PaddingVertical(20).Column(column =>
-                {
-                    column.Spacing(8);
-                    column.Item().Text($"Certificate Code: {record.CertificateCode}").Bold();
-                    column.Item().Text($"Username: {record.Username}");
-                    column.Item().Text($"Employee Name: {record.EmployeeName}");
-                    column.Item().Text($"User Type: {record.UserType}");
-                    column.Item().Text($"Age: {record.Age}");
-                    column.Item().Text($"DOB: {record.Dob:yyyy-MM-dd}");
-                    column.Item().Text($"Email: {record.Email}");
-                    column.Item().Text($"Scanner: {record.ScannerId}");
-                    column.Item().Text($"Salary: {(record.Salary.HasValue ? record.Salary.Value.ToString("0.00") : "N/A")}");
-                    column.Item().PaddingTop(10).Text("Use the scanner endpoint to verify this certificate.").Italic();
-                });
-
-                page.Footer().Column(column =>
-                {
-                    column.Item().AlignCenter().Height(45).Image(barcodePng);
-                    column.Item().AlignCenter().Text($"Generated on {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC").FontSize(9);
-                });
+                page.Footer().AlignRight().Text($"Generated on {DateTime.UtcNow:yyyy-MM-dd HH:mm} UTC").FontSize(9);
             });
         }).GeneratePdf();
     }
+
+    private static IContainer HeaderCellStyle(IContainer container) =>
+        container.Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6).Background(Colors.Grey.Lighten3);
+
+    private static IContainer BodyCellStyle(IContainer container) =>
+        container.Border(1).BorderColor(Colors.Grey.Lighten2).Padding(6);
 
     private static byte[] GenerateBarcode(string text)
     {

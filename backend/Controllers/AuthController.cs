@@ -16,10 +16,19 @@ public class AuthController(AppDbContext dbContext) : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<object>> Register([FromBody] EmployeeCreateRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
-            return BadRequest("Username and password are required.");
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+            return BadRequest("Email and password are required.");
 
-        if (await dbContext.EmployeeRecords.AnyAsync(e => e.Username == request.Username))
+        if (string.IsNullOrWhiteSpace(request.EmployeeName) ||
+            string.IsNullOrWhiteSpace(request.Address) ||
+            request.Dob == default)
+            return BadRequest("Name, dob and address are required.");
+
+        var username = string.IsNullOrWhiteSpace(request.Username)
+            ? request.Email.Split('@')[0].Trim().ToLowerInvariant()
+            : request.Username.Trim();
+
+        if (await dbContext.EmployeeRecords.AnyAsync(e => e.Username == username))
             return BadRequest("Username already exists.");
 
         if (await dbContext.EmployeeRecords.AnyAsync(e => e.Email == request.Email))
@@ -28,14 +37,15 @@ public class AuthController(AppDbContext dbContext) : ControllerBase
         var record = new EmployeeRecord
         {
             UserType = "user",
-            Username = request.Username.Trim(),
+            Username = username,
             Password = request.Password,
             EmployeeName = request.EmployeeName,
             Age = request.Age,
             Dob = request.Dob,
+            Address = request.Address,
             Email = request.Email,
             ScannerId = request.ScannerId,
-            Salary = null
+            Salary = request.Salary
         };
 
         dbContext.EmployeeRecords.Add(record);
@@ -50,7 +60,10 @@ public class AuthController(AppDbContext dbContext) : ControllerBase
         if (request.Username == AdminUsername && request.Password == AdminPassword)
             return Ok(new { role = "admin", userId = 0, name = "Administrator", username = AdminUsername });
 
-        var user = await dbContext.EmployeeRecords.FirstOrDefaultAsync(e => e.Username == request.Username && e.Password == request.Password);
+        if (string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest("Email is required.");
+
+        var user = await dbContext.EmployeeRecords.FirstOrDefaultAsync(e => e.Email == request.Email && e.Password == request.Password);
         if (user is null)
             return Unauthorized("Invalid username or password.");
 
@@ -61,5 +74,6 @@ public class AuthController(AppDbContext dbContext) : ControllerBase
 public class LoginRequest
 {
     public string Username { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
